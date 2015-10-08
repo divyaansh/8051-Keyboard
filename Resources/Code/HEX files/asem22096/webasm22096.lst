@@ -1,0 +1,204 @@
+
+ASEM-51 V1.4a2                                        Copyright (c) 2008 by W.W. Heinz                                        PAGE 1
+
+
+
+
+
+       MCS-51 Family Macro Assembler   A S E M - 5 1   V 1.4a2
+       =======================================================
+
+
+
+	Source File:	tmp/webasm22096.a51
+	Object File:	tmp/webasm22096.hex
+	List File:	tmp/webasm22096.lst
+
+
+
+ Line  I  Addr  Code            Source
+
+    1:		N      0000	ORG   0H
+    2:				;MOV   A,#38H;INIT. LCD 2 LINES, 5X7 MATRIX
+    3:				;ACALL COMNWRT ;call command subroutine
+    4:				;ACALL DELAY   ;give LCD some time
+    5:	  0000	74 0C		MOV   A,#0CH;display on, cursor off
+    6:	  0002	11 22		ACALL COMNWRT ;call command subroutine
+    7:	  0004	11 4E		ACALL DELAY   ;give LCD some time
+    8:	  0006	74 01		MOV   A,#01;clear LCD
+    9:	  0008	11 22		ACALL COMNWRT ;call command subroutine
+   10:	  000A	11 4E		ACALL DELAY   ;give LCD some time
+   11:				;MOV   A,#06H;shift cursor right
+   12:				;ACALL COMNWRT ;call command subroutine
+   13:				;ACALL DELAY   ;give LCD some time
+   14:	  000C	74 80		MOV   A,#80H;cursor at line 1, pos. 0
+   15:	  000E	11 22		ACALL COMNWRT ;call command subroutine
+   16:	  0010	11 4E		ACALL DELAY   ;give LCD some time
+   17:
+   18:	  0012	74 4E		MOV   A,#4EH ;display letter N
+   19:	  0014	11 2F		ACALL DATAWRT  ;call display subroutine
+   20:	  0016	11 4E		ACALL DELAY    ;give LCD some time
+   21:	  0018	74 4F		MOV   A,#4FH ;display letter O
+   22:	  001A	11 2F		ACALL DATAWRT  ;call display subroutine
+   23:	  001C	74 00		MOV   A,#00H
+   24:	  001E	F5 B0		MOV	  P3,A
+   25:	  0020	80 FE		AGAIN:  SJMP  AGAIN    ;stay here
+   26:
+   27:	  0022			COMNWRT:               ;send command to LCD
+   28:				;ACALL READY       ;is LCD ready?
+   29:	  0022	F5 A0		MOV   P2,A     ;copy regA to port 1
+   30:	  0024	C2 B0		CLR   P3.0     ;RS=0 for command
+   31:	  0026	C2 B1		CLR   P3.1     ;R/W=0 for write
+   32:	  0028	D2 B2		SETB  P3.2     ;E=1 for high pulse
+   33:	  002A	11 4E		ACALL DELAY    ;give LCD some time
+   34:	  002C	C2 B2		CLR   P3.2     ;E=0 for H-to-L pulse
+   35:	  002E	22		RET
+   36:
+   37:	  002F			DATAWRT:               ;write data to LCD
+   38:				;ACALL READY       ;is LCD ready?
+   39:	  002F	F5 A0		MOV   P2,A     ;copy regA to port 1
+   40:	  0031	D2 B0		SETB  P3.0     ;RS=1 for data
+   41:	  0033	C2 B1		CLR   P3.1     ;R/W=0 for write
+   42:	  0035	D2 B2		SETB  P3.2     ;E=1 for high pulse
+   43:	  0037	11 4E		ACALL DELAY    ;give LCD some time
+
+ASEM-51 V1.4a2                                        Copyright (c) 2008 by W.W. Heinz                                        PAGE 2
+
+
+
+ Line  I  Addr  Code            Source
+
+   44:	  0039	C2 B2		CLR   P3.2     ;E=0 for H-to-L pulse
+   45:	  003B	22		RET
+   46:
+   47:	  003C			READY:
+   48:	  003C	D2 A7		SETB  P2.7        ;make P2.7 input port
+   49:	  003E	C2 B0		CLR   P3.0        ;RS=0 access command reg
+   50:	  0040	D2 B1		SETB  P3.1        ;R/W=1 read command reg
+   51:				;read command regand check busy flag
+   52:	  0042	D2 B2		BACK:SETB  P3.2        ;E=1 for H-to-L pulse
+   53:	  0044	7C FF		MOV   R4,#255  ;R4 = 255
+   54:	  0046	DC FE		HERE3:   DJNZ  R4,HERE3
+   55:	  0048	C2 B2		CLR   P3.2        ;E=0 H-to-L pulse
+   56:	  004A	20 A7 F5	JB    P2.7,BACK   ;stay until busy flag=0
+   57:	  004D	22		RET
+   58:
+   59:	  004E			DELAY:
+   60:	  004E	7B 32		MOV   R3,#50   ;50 or higher for fast CPUs
+   61:	  0050	7C FF		HERE2:  MOV   R4,#255  ;R4 = 255
+   62:	  0052	DC FE		HERE:   DJNZ  R4,HERE  ;stay until R4 becomes 0
+   63:	  0054	DB FA		DJNZ  R3,HERE2
+   64:	  0056	22		RET
+   65:
+   66:				END
+
+
+
+
+
+                     register banks used:  ---
+
+                     no errors
+
+
+
+
+ASEM-51 V1.4a2                                        Copyright (c) 2008 by W.W. Heinz                                        PAGE 3
+
+
+
+
+
+	       L I S T   O F   S Y M B O L S
+	       =============================
+
+
+SYMBOL				  TYPE     VALUE	LINE
+------------------------------------------------------------
+??ASEM_51			  NUMBER    8051
+??VERSION			  NUMBER    0140
+AC				  BIT	      D6
+ACC				  DATA	      E0
+AGAIN				  CODE	    0020	  25
+B				  DATA	      F0
+BACK				  CODE	    0042	  52
+COMNWRT				  CODE	    0022	  27
+CY				  BIT	      D7
+DATAWRT				  CODE	    002F	  37
+DELAY				  CODE	    004E	  59
+DPH				  DATA	      83
+DPL				  DATA	      82
+EA				  BIT	      AF
+ES				  BIT	      AC
+ET0				  BIT	      A9
+ET1				  BIT	      AB
+EX0				  BIT	      A8
+EX1				  BIT	      AA
+EXTI0				  CODE	    0003
+EXTI1				  CODE	    0013
+F0				  BIT	      D5
+HERE				  CODE	    0052	  62
+HERE2				  CODE	    0050	  61
+HERE3				  CODE	    0046	  54
+IE				  DATA	      A8
+IE0				  BIT	      89
+IE1				  BIT	      8B
+INT0				  BIT	      B2
+INT1				  BIT	      B3
+IP				  DATA	      B8
+IT0				  BIT	      88
+IT1				  BIT	      8A
+OV				  BIT	      D2
+P				  BIT	      D0
+P0				  DATA	      80
+P1				  DATA	      90
+P2				  DATA	      A0
+P3				  DATA	      B0
+PCON				  DATA	      87
+PS				  BIT	      BC
+PSW				  DATA	      D0
+PT0				  BIT	      B9
+PT1				  BIT	      BB
+PX0				  BIT	      B8
+PX1				  BIT	      BA
+RB8				  BIT	      9A
+RD				  BIT	      B7
+READY				  CODE	    003C	  47
+REN				  BIT	      9C
+
+ASEM-51 V1.4a2                                        Copyright (c) 2008 by W.W. Heinz                                        PAGE 4
+
+
+
+SYMBOL				  TYPE     VALUE	LINE
+------------------------------------------------------------
+RESET				  CODE	    0000
+RI				  BIT	      98
+RS0				  BIT	      D3
+RS1				  BIT	      D4
+RXD				  BIT	      B0
+SBUF				  DATA	      99
+SCON				  DATA	      98
+SINT				  CODE	    0023
+SM0				  BIT	      9F
+SM1				  BIT	      9E
+SM2				  BIT	      9D
+SP				  DATA	      81
+T0				  BIT	      B4
+T1				  BIT	      B5
+TB8				  BIT	      9B
+TCON				  DATA	      88
+TF0				  BIT	      8D
+TF1				  BIT	      8F
+TH0				  DATA	      8C
+TH1				  DATA	      8D
+TI				  BIT	      99
+TIMER0				  CODE	    000B
+TIMER1				  CODE	    001B
+TL0				  DATA	      8A
+TL1				  DATA	      8B
+TMOD				  DATA	      89
+TR0				  BIT	      8C
+TR1				  BIT	      8E
+TXD				  BIT	      B1
+WR				  BIT	      B6

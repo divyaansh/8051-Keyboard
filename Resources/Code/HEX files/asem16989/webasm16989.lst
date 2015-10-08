@@ -1,0 +1,248 @@
+
+ASEM-51 V1.4a2                                        Copyright (c) 2008 by W.W. Heinz                                        PAGE 1
+
+
+
+
+
+       MCS-51 Family Macro Assembler   A S E M - 5 1   V 1.4a2
+       =======================================================
+
+
+
+	Source File:	tmp/webasm16989.a51
+	Object File:	tmp/webasm16989.hex
+	List File:	tmp/webasm16989.lst
+
+
+
+ Line  I  Addr  Code            Source
+
+    1:		N      0300	ORG 300h
+    2:
+    3:	  0300	41 45 49 4D	KCODE0: DB 41h,'E','I','M','Q','U','Y','#'
+	  0304	51 55 59 23
+    4:	  0308	42 46 4A 4E	KCODE1: DB 'B','F','J','N','R','V','Z','@'
+	  030C	52 56 5A 40
+    5:	  0310	43 47 4B 4F	KCODE2: DB 'C','G','K','O','S','W',',',':'
+	  0314	53 57 2C 3A
+    6:	  0318	44 48 4C 50	KCODE3: DB 'D','H','L','P','T','X','.','!'
+	  031C	54 58 2E 21
+    7:
+    8:		N      0000	ORG 0h
+    9:
+   10:		B	 B0	RS BIT P3.0
+   11:		B	 B1	RW BIT P3.1
+   12:		B	 B2	EN BIT P3.2
+   13:
+   14:	  0000	C2 B0		CLR RS
+   15:	  0002	C2 B1		CLR RW
+   16:	  0004	75 A0 0C	MOV P2,#0Ch
+   17:	  0007	11 6D		ACALL ENPULSE
+   18:
+   19:	  0009	75 90 FF	MOV P1,#0FFh
+   20:	  000C			K1:
+   21:	  000C	75 B0 09		MOV P3,#09h
+   22:	  000F	E5 90			MOV A,P1
+   23:	  0011	B4 FF F8		CJNE A,#0FFh,K1
+   24:	  0014			K2:
+   25:	  0014	11 76			ACALL DELAY
+   26:	  0016	E5 90			MOV A,P1
+   27:	  0018	B4 FF 02		CJNE A,#0FFh,OVER
+   28:	  001B	80 F7			SJMP K2
+   29:	  001D			OVER:
+   30:	  001D	11 76			ACALL DELAY
+   31:	  001F	E5 90			MOV A,P1
+   32:	  0021	B4 FF 02		CJNE A,#0FFh,OVER1
+   33:	  0024	80 EE			SJMP K2
+   34:	  0026			OVER1:
+   35:	  0026	75 B0 E9		MOV P3,#11101001b
+   36:	  0029	E5 90			MOV A,P1
+   37:	  002B	B4 FF 1B		CJNE A,#0FFh,ROW0
+   38:	  002E	75 B0 D9		MOV P3,#11011001b
+   39:	  0031	E5 90			MOV A,P1
+
+ASEM-51 V1.4a2                                        Copyright (c) 2008 by W.W. Heinz                                        PAGE 2
+
+
+
+ Line  I  Addr  Code            Source
+
+   40:	  0033	B4 FF 18		CJNE A,#0FFh,ROW1
+   41:	  0036	75 B0 B9		MOV P3,#10111001b
+   42:	  0039	E5 90			MOV A,P1
+   43:	  003B	B4 FF 15		CJNE A,#0FFh,ROW2
+   44:	  003E	75 B0 79		MOV P3,#01111001b
+   45:	  0041	E5 90			MOV A,P1
+   46:	  0043	B4 FF 12		CJNE A,#0FFh,ROW3
+   47:	  0046	02 00 14		LJMP K2
+   48:	  0049			ROW0:
+   49:	  0049	90 03 00		MOV DPTR,#KCODE0
+   50:	  004C	80 0D			SJMP FIND
+   51:	  004E			ROW1:
+   52:	  004E	90 03 08		MOV DPTR,#KCODE1
+   53:	  0051	80 08			SJMP FIND
+   54:	  0053			ROW2:
+   55:	  0053	90 03 10		MOV DPTR,#KCODE2
+   56:	  0056	80 03			SJMP FIND
+   57:	  0058			ROW3:
+   58:	  0058	90 03 18		MOV DPTR,#KCODE3
+   59:
+   60:	  005B			FIND:
+   61:	  005B	13			RRC A
+   62:	  005C	50 03			JNC MATCH
+   63:	  005E	A3			INC DPTR
+   64:	  005F	80 FA			SJMP FIND
+   65:	  0061			MATCH:
+   66:	  0061	E4			CLR A
+   67:	  0062	93			MOVC A,@A+DPTR
+   68:	  0063	75 B0 09		MOV P3,#09h
+   69:	  0066	F5 A0			MOV P2,A
+   70:	  0068	11 6D			ACALL ENPULSE
+   71:	  006A	02 00 0C		LJMP K1
+   72:
+   73:	  006D			ENPULSE:
+   74:	  006D	D2 B2			SETB EN
+   75:	  006F	11 76			ACALL DELAY
+   76:	  0071	C2 B2			CLR EN
+   77:	  0073	11 76			ACALL DELAY
+   78:	  0075	22		RET
+   79:
+   80:	  0076			DELAY:
+   81:	  0076	7B 32			MOV R3,#50
+   82:	  0078				OUTER:
+   83:	  0078	7C FF				MOV R4,#255
+   84:	  007A					INNER:
+   85:	  007A	DC FE					DJNZ R4,INNER
+   86:	  007C	DB FA				DJNZ R3,OUTER
+   87:	  007E	22		RET
+   88:
+   89:				END
+
+
+
+
+
+                     register banks used:  ---
+
+ASEM-51 V1.4a2                                        Copyright (c) 2008 by W.W. Heinz                                        PAGE 3
+
+
+
+
+                     no errors
+
+
+
+
+ASEM-51 V1.4a2                                        Copyright (c) 2008 by W.W. Heinz                                        PAGE 4
+
+
+
+
+
+	       L I S T   O F   S Y M B O L S
+	       =============================
+
+
+SYMBOL				  TYPE     VALUE	LINE
+------------------------------------------------------------
+??ASEM_51			  NUMBER    8051
+??VERSION			  NUMBER    0140
+AC				  BIT	      D6
+ACC				  DATA	      E0
+B				  DATA	      F0
+CY				  BIT	      D7
+DELAY				  CODE	    0076	  80
+DPH				  DATA	      83
+DPL				  DATA	      82
+EA				  BIT	      AF
+EN				  BIT	      B2	  12
+ENPULSE				  CODE	    006D	  73
+ES				  BIT	      AC
+ET0				  BIT	      A9
+ET1				  BIT	      AB
+EX0				  BIT	      A8
+EX1				  BIT	      AA
+EXTI0				  CODE	    0003
+EXTI1				  CODE	    0013
+F0				  BIT	      D5
+FIND				  CODE	    005B	  60
+IE				  DATA	      A8
+IE0				  BIT	      89
+IE1				  BIT	      8B
+INNER				  CODE	    007A	  84
+INT0				  BIT	      B2
+INT1				  BIT	      B3
+IP				  DATA	      B8
+IT0				  BIT	      88
+IT1				  BIT	      8A
+K1				  CODE	    000C	  20
+K2				  CODE	    0014	  24
+KCODE0				  CODE	    0300	   3
+KCODE1				  CODE	    0308	   4
+KCODE2				  CODE	    0310	   5
+KCODE3				  CODE	    0318	   6
+MATCH				  CODE	    0061	  65
+OUTER				  CODE	    0078	  82
+OV				  BIT	      D2
+OVER				  CODE	    001D	  29
+OVER1				  CODE	    0026	  34
+P				  BIT	      D0
+P0				  DATA	      80
+P1				  DATA	      90
+P2				  DATA	      A0
+P3				  DATA	      B0
+PCON				  DATA	      87
+PS				  BIT	      BC
+PSW				  DATA	      D0
+PT0				  BIT	      B9
+
+ASEM-51 V1.4a2                                        Copyright (c) 2008 by W.W. Heinz                                        PAGE 5
+
+
+
+SYMBOL				  TYPE     VALUE	LINE
+------------------------------------------------------------
+PT1				  BIT	      BB
+PX0				  BIT	      B8
+PX1				  BIT	      BA
+RB8				  BIT	      9A
+RD				  BIT	      B7
+REN				  BIT	      9C
+RESET				  CODE	    0000
+RI				  BIT	      98
+ROW0				  CODE	    0049	  48
+ROW1				  CODE	    004E	  51
+ROW2				  CODE	    0053	  54
+ROW3				  CODE	    0058	  57
+RS				  BIT	      B0	  10
+RS0				  BIT	      D3
+RS1				  BIT	      D4
+RW				  BIT	      B1	  11
+RXD				  BIT	      B0
+SBUF				  DATA	      99
+SCON				  DATA	      98
+SINT				  CODE	    0023
+SM0				  BIT	      9F
+SM1				  BIT	      9E
+SM2				  BIT	      9D
+SP				  DATA	      81
+T0				  BIT	      B4
+T1				  BIT	      B5
+TB8				  BIT	      9B
+TCON				  DATA	      88
+TF0				  BIT	      8D
+TF1				  BIT	      8F
+TH0				  DATA	      8C
+TH1				  DATA	      8D
+TI				  BIT	      99
+TIMER0				  CODE	    000B
+TIMER1				  CODE	    001B
+TL0				  DATA	      8A
+TL1				  DATA	      8B
+TMOD				  DATA	      89
+TR0				  BIT	      8C
+TR1				  BIT	      8E
+TXD				  BIT	      B1
+WR				  BIT	      B6

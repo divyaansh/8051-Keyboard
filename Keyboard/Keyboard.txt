@@ -1,0 +1,90 @@
+RS BIT P3.0 ;0:Command 1:Data
+RW BIT P3.1 ;0:Write 1:Read
+EN BIT P3.2 ;1:Enable
+
+ORG 0h
+
+;Write in Command Reg of LCD
+CLR RS
+CLR RW
+MOV P2,#0Ch
+ACALL ENPULSE
+
+MOV P1,#0FFh ;P1 as Input
+K1: ;To check key release
+	MOV P3,#09h ;Columns at 0000, RS=1 RW=0 to Write in Data Reg
+	MOV A,P1
+	CJNE A,#0FFh,K1 ;Move ahead if all keys released
+K2: ;To check for key press
+	ACALL DELAY
+	MOV A,P1
+	CJNE A,#0FFh,OVER ;Move ahead if any key pressed
+	SJMP K2
+OVER: ;To accomodate for debounce
+	ACALL DELAY
+	MOV A,P1
+	CJNE A,#0FFh,OVER1 ;Move ahead if key still pressed
+	SJMP K2  ;No key pressed
+OVER1: ;Polling
+	MOV P3,#0E9h ;Columns at 1110
+	MOV A,P1
+	CJNE A,#0FFh,COLUMN0
+	MOV P3,#0D9h ;Columns at 1101
+	MOV A,P1
+	CJNE A,#0FFh,COLUMN1
+	MOV P3,#0B9h ;Columns at 1011
+	MOV A,P1
+	CJNE A,#0FFh,COLUMN2
+	MOV P3,#79h  ;Columns at 0111
+	MOV A,P1
+	CJNE A,#0FFh,COLUMN3
+	LJMP K2 ;No key pressed
+COLUMN0:
+	MOV DPTR,#KCODE0
+	SJMP FIND
+COLUMN1:
+	MOV DPTR,#KCODE1
+	SJMP FIND
+COLUMN2:
+	MOV DPTR,#KCODE2
+	SJMP FIND
+COLUMN3:
+	MOV DPTR,#KCODE3
+
+FIND: ;Find the value in the look up table whose address is in DPTR
+	RRC A 
+	JNC MATCH ;If a 0 is found in A, print it on LCD
+	INC DPTR ;Point to the next address
+	SJMP FIND
+MATCH: ;Prints the value in the location pointed by DPTR
+	CLR A
+	MOVC A,@A+DPTR
+	MOV P3,#09h ;Columns at 0000, RS=1 RW=0 to Write in Data Reg
+	MOV P2,A
+	ACALL ENPULSE
+	LJMP K1
+	
+ENPULSE: ;Enables the LCD for 1 Delay Unit
+	SETB EN
+	ACALL DELAY
+	CLR EN
+	ACALL DELAY
+RET
+
+DELAY: ;1 Delay Unit= (1+36*(1+255*2+2)+2)/(11.0592e6/12)= 20.0ms
+	MOV R3,#36
+	OUTER:
+		MOV R4,#255
+		INNER:
+			DJNZ R4,INNER
+		DJNZ R3,OUTER
+RET
+
+ORG 300h
+
+KCODE0: DB 'A','E','I','M','Q','U','Y','#'
+KCODE1: DB 'B','F','J','N','R','V','Z','@'
+KCODE2: DB 'C','G','K','O','S','W',',',':'
+KCODE3: DB 'D','H','L','P','T','X','.',' '
+
+END 
